@@ -31,8 +31,8 @@
     }
 
     100% {
-        width: 220vh;
-        height: 220vh;
+        width: max(220vh, 220vw);
+        height: max(220vh, 220vw);
     }
 
 }
