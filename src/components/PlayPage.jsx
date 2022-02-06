@@ -7,11 +7,9 @@ import "../styles/play.css"
 
 const API_KEY = "dict.1.1.20220204T134754Z.fe20c29503ca8685.20a4447b4efb421ec3ac3bb5c554cbf7d626aecd"
 const LETTERS = ['q', 'w', 'e', 'r', 't', 'y', 'u', 'i', 'o', 'p', 'a', 's', 'd', 'f', 'g', 'h', 'j', 'k', 'l', 'z', 'x', 'c', 'v', 'b', 'n', 'm'];
-const PlayPage = () => {
-    const params = useParams();
+const PlayPage = ({number}) => {
     const navigate = useNavigate();
 
-    const number = parseInt(params.num);
     const [currentLetter, setCurrentLetter] = useState(null);
 
     const [correctWord, setCorrectWord] = useState(null);
@@ -19,8 +17,8 @@ const PlayPage = () => {
     const [currentWord, setCurrentWord] = useState(0);
     const [currentIndex, setCurrentIndex] = useState(0);
 
-    const [result, setResult] = useState(null);
-    const [wordBoard, setWordBoard] = useState(null);
+    const [result, setResult] = useState(new Array(number).fill([]));
+    const [wordBoard, setWordBoard] = useState(new Array(number).fill("").map( i => (new Array(number).fill(""))));
 
     const [correct, setCorrect] = useState(false);
     const [gameOver, setGameOver] = useState(false);
@@ -48,8 +46,6 @@ const PlayPage = () => {
 
     useEffect(() => {
         console.log(number);
-        setResult(new Array(number).fill([]));
-        setWordBoard(new Array(number).fill("").map( i => (new Array(number).fill(""))));
         // if (!number) {
         //     setNumber(parseInt(params.num));
         // }
@@ -99,32 +95,30 @@ const PlayPage = () => {
     }
 
     useEffect(() => {
-        if (wordBoard) {
-            let wordIndex = currentWord;
-            let letterIndex = currentIndex;
-            let temp = wordBoard[wordIndex];
-            console.log(wordIndex, letterIndex);
+        let wordIndex = currentWord;
+        let letterIndex = currentIndex;
+        let temp = wordBoard[wordIndex];
+        console.log(wordIndex, letterIndex);
 
-            if (currentLetter ) {
-                if ( currentLetter[0] && letterIndex < number ) {
-                    temp[letterIndex] = currentLetter[0];
-                    setCurrentIndex(letterIndex + 1);
-                } else if (!currentLetter[0]) {
-                    if (letterIndex > 0 || letterIndex >= number) {
-                        temp[letterIndex - 1] = "";
-                        setCurrentIndex(letterIndex - 1);
-                    }
+        if (currentLetter ) {
+            if ( currentLetter[0] && letterIndex < number ) {
+                temp[letterIndex] = currentLetter[0];
+                setCurrentIndex(letterIndex + 1);
+            } else if (!currentLetter[0]) {
+                if (letterIndex > 0 || letterIndex >= number) {
+                    temp[letterIndex - 1] = "";
+                    setCurrentIndex(letterIndex - 1);
                 }
             }
-
-            let tempBoard = wordBoard;
-            tempBoard[currentWord] = temp;
-            console.log(tempBoard)
-
-            setWordBoard(tempBoard);
         }
 
-    }, [currentLetter, wordBoard]);
+        let tempBoard = wordBoard;
+        tempBoard[currentWord] = temp;
+        console.log(tempBoard)
+
+        setWordBoard(tempBoard);
+
+    }, [currentLetter]);
 
 
     const reset = () => {

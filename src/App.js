@@ -1,5 +1,5 @@
 import Menu from './components/Menu';
-import { BrowserRouter, Route, Routes} from 'react-router-dom';
+import { HashRouter, Route, Routes} from 'react-router-dom';
 import { useRef } from 'react'
 import './App.css';
 import PlayPage from './components/PlayPage';
@@ -16,12 +16,16 @@ function App() {
   return (
     <div className="App" onScroll={(e) => scroll(e)}>
       <h1 className='app-title' ref={titleRef} >Wordle!</h1>
-      <BrowserRouter>
+      <HashRouter>
         <Routes>
           <Route path={process.env.PUBLIC_URL + '/'} element={<Menu />} />
-          <Route path={process.env.PUBLIC_URL + '/:num'} element={<PlayPage />} />
+          <Route path={process.env.PUBLIC_URL + '/4'} element={<PlayPage number={4} />} />
+          <Route path={process.env.PUBLIC_URL + '/5'} element={<PlayPage number={5} />} />
+          <Route path={process.env.PUBLIC_URL + '/6'} element={<PlayPage number={6} />} />
+          <Route path={process.env.PUBLIC_URL + '/7'} element={<PlayPage number={7} />} />
+          <Route path={process.env.PUBLIC_URL + '/8'} element={<PlayPage number={8} />} />
         </Routes>
-      </BrowserRouter>
+      </HashRouter>
     </div>
   );
 }
