@@ -48,8 +48,8 @@ const PlayPage = () => {
 
     useEffect(() => {
         console.log(number);
-        setResult(new Array(number).fill([]));
-        setWordBoard(new Array(number).fill("").map( i => (new Array(number).fill(""))));
+        // setResult(new Array(number).fill([]));
+        // setWordBoard(new Array(number).fill("").map( i => (new Array(number).fill(""))));
         // if (!number) {
         //     setNumber(parseInt(params.num));
         // }
