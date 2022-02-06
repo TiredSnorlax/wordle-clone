@@ -55,7 +55,7 @@
    }
 
    100% {
-       width: 250vh;
+       width: 250vw;
        height: 250vh;
    }
 }
