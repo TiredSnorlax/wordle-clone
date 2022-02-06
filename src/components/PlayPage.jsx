@@ -11,7 +11,7 @@ const PlayPage = () => {
     const params = useParams();
     const navigate = useNavigate();
 
-    const [number, setNumber] = useState(parseInt(params.num));
+    const number = parseInt(params.num);
     const [currentLetter, setCurrentLetter] = useState(null);
 
     const [correctWord, setCorrectWord] = useState(null);
@@ -19,7 +19,6 @@ const PlayPage = () => {
     const [currentWord, setCurrentWord] = useState(0);
     const [currentIndex, setCurrentIndex] = useState(0);
 
-    const [wordToCheck, setWordToCheck] = useState(null);
     const [result, setResult] = useState(new Array(number).fill([]));
     const [wordBoard, setWordBoard] = useState(new Array(number).fill("").map( i => (new Array(number).fill(""))));
 
@@ -49,6 +48,8 @@ const PlayPage = () => {
 
     useEffect(() => {
         console.log(number);
+        setResult(new Array(number).fill([]));
+        setWordBoard(new Array(number).fill("").map( i => (new Array(number).fill(""))));
         // if (!number) {
         //     setNumber(parseInt(params.num));
         // }
@@ -68,6 +69,7 @@ const PlayPage = () => {
         if (correctWord === word.join("")) {
             console.log("correct");
             setCorrect(true);
+            setGameOver(true);
         } else if (currentWord + 1 === number) {
             console.log('gameover')
             setGameOver(true);
@@ -153,7 +155,7 @@ const PlayPage = () => {
     <div className={`play-content-container ${number ? `num-${number}` : ""}` }>
         <div className={`backBtn ${goingHome ? "goingHome" : ""} `} onClick={goBackHome}><span className='fas fa-arrow-left'></span></div>
         <div className='play-word-container'>
-            { wordBoard.map( (item, i) => (
+            { wordBoard && wordBoard.map( (item, i) => (
                 <Word number={number} key={i} wordIndex={i} currentLetter={currentLetter} currentIndex={currentIndex} setCurrentIndex={setCurrentIndex} currentWord={currentWord} result={result} wordBoard={wordBoard} setWordBoard={setWordBoard} />
             ))}
         </div>
