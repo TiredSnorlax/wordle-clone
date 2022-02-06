@@ -18,8 +18,8 @@ function App() {
       <h1 className='app-title' ref={titleRef} >Wordle!</h1>
       <BrowserRouter>
         <Routes>
-          <Route path="/" element={<Menu />} />
-          <Route path="/:num" element={<PlayPage />} />
+          <Route path={process.env.PUBLIC_URL + '/'} element={<Menu />} />
+          <Route path={process.env.PUBLIC_URL + '/:num'} element={<PlayPage />} />
         </Routes>
       </BrowserRouter>
     </div>
