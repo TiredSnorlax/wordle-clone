@@ -5,7 +5,6 @@ import data from '../data';
 
 import "../styles/play.css"
 
-const API_KEY = "dict.1.1.20220204T134754Z.fe20c29503ca8685.20a4447b4efb421ec3ac3bb5c554cbf7d626aecd"
 const LETTERS = ['q', 'w', 'e', 'r', 't', 'y', 'u', 'i', 'o', 'p', 'a', 's', 'd', 'f', 'g', 'h', 'j', 'k', 'l', 'z', 'x', 'c', 'v', 'b', 'n', 'm'];
 const PlayPage = ({number}) => {
     const navigate = useNavigate();
@@ -17,35 +16,41 @@ const PlayPage = ({number}) => {
     const [currentWord, setCurrentWord] = useState(0);
     const [currentIndex, setCurrentIndex] = useState(0);
 
+    const [correctLetters, setCorrectLetters] = useState([]);
+    const [wrongLetters, setWrongLetters] = useState([]);
+    const [placeLetters, setPlaceLetters] = useState([]);
+
     const [result, setResult] = useState(new Array(number).fill([]));
-    const [wordBoard, setWordBoard] = useState(new Array(number).fill("").map( i => (new Array(number).fill(""))));
+    const [wordBoard, setWordBoard] = useState(new Array(number + 1).fill("").map( i => (new Array(number).fill(""))));
 
     const [correct, setCorrect] = useState(false);
     const [gameOver, setGameOver] = useState(false);
 
     const [goingHome, setGoingHome] = useState(false);
+    const [message, setMessage] = useState(null);
 
     const checkValid = async () => {
-        console.log('check valid')
         const word = wordBoard[currentWord].join("")
-        if (word.length < number) {
-            return
-        }
-        console.log(word)
-        await fetch( `https://dictionary.yandex.net/api/v1/dicservice.json/lookup?key=${API_KEY}&lang=en-en&text=${word}`)
+        fetch(`https://mashape-community-urban-dictionary.p.rapidapi.com/define?term=${word}`, {
+            "method": "GET",
+            "headers": {
+                "x-rapidapi-host": "mashape-community-urban-dictionary.p.rapidapi.com",
+                "x-rapidapi-key": process.env.REACT_APP_KEY
+            }
+        })
         .then(response => response.json())
         .then(data => {
             console.log(data)
-            if (data.def.length > 0) {
+            if (data && data["list"].length > 0) {
                 checkWord();
             } else {
                 console.log('not valid')
+                setMessage("Not a valid word")
             }
         });
     }
 
     useEffect(() => {
-        console.log(number);
         // if (!number) {
         //     setNumber(parseInt(params.num));
         // }
@@ -60,34 +65,54 @@ const PlayPage = ({number}) => {
 
 
     const checkWord = async () => {
-        console.log("check word")
         const word = wordBoard[currentWord];
         if (correctWord === word.join("")) {
-            console.log("correct");
             setCorrect(true);
             setGameOver(true);
         } else if (currentWord + 1 === number) {
-            console.log('gameover')
             setGameOver(true);
         }
-        console.log(correctWord)
         const correctArray = correctWord.split("");
+        let correctObject = {};
+
+        let correctLettersIndex = {};
+
+        for (let i=0; i < correctArray.length; i++) {
+            correctObject[correctArray[i]] = correctArray.filter(word => word === correctArray[i])
+            correctLettersIndex[correctArray[i]] = [];
+        };
+
         let temp = new Array(number);
+        let _correctLetters = [];
+        let _wrongLetters = [];
+        let _placeLetters = [];
         for (let i=0; i < correctArray.length; i++) {
             if (correctArray[i] === word[i]) {
-                temp[i] = 'correct';
-            } else if (correctArray.includes(word[i])) {
-                temp[i] = 'wrong-place';
-            } else {
-                temp[i] = 'wrong';
+                temp[i] = 'correct checking';
+                correctLettersIndex[correctArray[i]].push(i);
+                _correctLetters.push(word[i]);
+            } else if (!correctArray.includes(word[i])) {
+                temp[i] = 'wrong checking';
+                _wrongLetters.push(word[i]);
+            }
+        }
+
+        for (let i=0; i < correctArray.length; i++) {
+            if (correctArray.includes(word[i]) && correctObject[word[i]].length > correctLettersIndex[word[i]].length && correctObject[word[i]].length > _placeLetters.filter(w=>w===word[i]).length ) {
+                temp[i] = 'wrong-place checking';
+                _placeLetters.push(word[i]);
+            } else if (correctLettersIndex[word[i]] && !correctLettersIndex[word[i]].includes(i)) {
+                temp[i] = "wrong checking"
             }
         }
 
         let tempResult = result;
-        console.log(tempResult);
         tempResult[currentWord] = temp;
 
-        console.log('set result')
+        setCorrectLetters(_correctLetters);
+        setWrongLetters(_wrongLetters);
+        setPlaceLetters(_placeLetters);
+
         setResult([...tempResult]);
         setCurrentIndex(0);
         setCurrentWord(currentWord + 1);
@@ -98,7 +123,6 @@ const PlayPage = ({number}) => {
         let wordIndex = currentWord;
         let letterIndex = currentIndex;
         let temp = wordBoard[wordIndex];
-        console.log(wordIndex, letterIndex);
 
         if (currentLetter ) {
             if ( currentLetter[0] && letterIndex < number ) {
@@ -114,7 +138,6 @@ const PlayPage = ({number}) => {
 
         let tempBoard = wordBoard;
         tempBoard[currentWord] = temp;
-        console.log(tempBoard)
 
         setWordBoard(tempBoard);
 
@@ -123,7 +146,7 @@ const PlayPage = ({number}) => {
 
     const reset = () => {
         setResult(new Array(number).fill([]));
-        setWordBoard(new Array(number).fill("").map( i => (new Array(8).fill(""))));
+        setWordBoard(new Array(number).fill("").map( i => (new Array(number).fill(""))));
 
         setCurrentIndex(0);
         setCurrentWord(0);
@@ -155,9 +178,10 @@ const PlayPage = ({number}) => {
                 <Word number={number} key={i} wordIndex={i} currentLetter={currentLetter} currentIndex={currentIndex} setCurrentIndex={setCurrentIndex} currentWord={currentWord} result={result} wordBoard={wordBoard} setWordBoard={setWordBoard} />
             ))}
         </div>
-        <KeyBoard setCurrentLetter={setCurrentLetter} checkValid={checkValid} number={number} currentIndex={currentIndex} />
+        <KeyBoard setCurrentLetter={setCurrentLetter} checkValid={checkValid} number={number} currentIndex={currentIndex} correctLetters={correctLetters} wrongLetters={wrongLetters} placeLetters={placeLetters} />
     </div>
     { gameOver && <GameOverMenu reset={reset} correctWord={correctWord} correct={correct} /> }
+    { message && <Message message={message} setMessage={setMessage} /> }
   </>;
 };
 
@@ -207,12 +231,12 @@ const Letter = ({ index, currentIndex, wordIndex, currentWord, classList, letter
     }, [currentIndex, currentWord]);
 
 
-    return <div className={`play-letter ${selected ? "selected" : ""} ${classList && classList[index]}`} >
+    return <div className={`play-letter ${selected ? "selected" : ""} ${classList && classList[index]}`} style={{ '--i': `${index}` }} >
         <p>{letter}</p>
     </div>
 }
 
-const KeyBoard = ({setCurrentLetter, checkValid, number, currentIndex}) => {
+const KeyBoard = ({setCurrentLetter, checkValid, number, currentIndex, correctLetters, wrongLetters, placeLetters}) => {
 
     useEffect(() => {
         window.addEventListener("keydown", (event) => {
@@ -228,17 +252,17 @@ const KeyBoard = ({setCurrentLetter, checkValid, number, currentIndex}) => {
     return <div className='keyboard'>
         <div className='keyboard-row'>
             { new Array(10).fill(1).map( (item, i) => (
-                <KeyBoardLetter index={i} key={i} rowOffset={0} setCurrentLetter={setCurrentLetter} />
+                <KeyBoardLetter index={i} key={i} rowOffset={0} setCurrentLetter={setCurrentLetter} correctLetters={correctLetters} wrongLetters={wrongLetters} placeLetters={placeLetters} />
             ))}
         </div>
         <div className='keyboard-row'>
             { new Array(9).fill(1).map( (item, i) => (
-                <KeyBoardLetter index={i} key={i} rowOffset={10} setCurrentLetter={setCurrentLetter} />
+                <KeyBoardLetter index={i} key={i} rowOffset={10} setCurrentLetter={setCurrentLetter} correctLetters={correctLetters} wrongLetters={wrongLetters} placeLetters={placeLetters} />
             ))}
         </div>
         <div className='keyboard-row'>
             { new Array(7).fill(1).map( (item, i) => (
-                <KeyBoardLetter index={i} key={i} rowOffset={19} setCurrentLetter={setCurrentLetter} />
+                <KeyBoardLetter index={i} key={i} rowOffset={19} setCurrentLetter={setCurrentLetter} correctLetters={correctLetters} wrongLetters={wrongLetters} placeLetters={placeLetters} />
             ))}
             <DeleteLetter setCurrentLetter={setCurrentLetter} />
         </div>
@@ -246,14 +270,26 @@ const KeyBoard = ({setCurrentLetter, checkValid, number, currentIndex}) => {
     </div>
 }
 
-const KeyBoardLetter = ({ index, rowOffset, setCurrentLetter }) => {
+const KeyBoardLetter = ({ index, rowOffset, setCurrentLetter, correctLetters, wrongLetters, placeLetters }) => {
     const letter = LETTERS[index + rowOffset];
+    const [letterClass, setLetterClass] = useState();
+
+    useEffect(() => {
+        if (correctLetters.includes(letter)) {
+            setLetterClass("correct");
+        } else if (wrongLetters.includes(letter)) {
+            setLetterClass("wrong");
+        } else if ( placeLetters.includes(letter)) {
+            setLetterClass("place")
+        }
+    }, [correctLetters, wrongLetters, placeLetters]);
+
 
     const click = () => {
         setCurrentLetter([...letter]);
     }
 
-    return <div className='keyboard-letter' onClick={click}>
+    return <div className={'keyboard-letter ' + letterClass} onClick={click}>
         <p>{letter}</p>
     </div>
 }
@@ -270,8 +306,6 @@ const DeleteLetter = ({ setCurrentLetter }) => {
 
 const GameOverMenu = ({reset, correctWord, correct }) => {
 
-
-
     return <div className='game-over-menu-container'>
         <div className='game-over-menu'>
             <h2>{ correct ? "You win!" : "Game Over" }</h2>
@@ -279,4 +313,20 @@ const GameOverMenu = ({reset, correctWord, correct }) => {
             <button onClick={reset}>Play again</button>
         </div>
     </div>
+}
+
+const Message = ({ message, setMessage }) => {
+
+    useEffect(() => {
+        setTimeout(() => {
+            setMessage(null);
+
+        }, 1200);
+    }, []);
+
+
+    return <>
+        <div className='message'>{message}</div>
+    </>
+
 }

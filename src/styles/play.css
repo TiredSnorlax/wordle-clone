@@ -64,6 +64,10 @@
     user-select: none;
 }
 
+.backBtn span {
+    user-select: none;
+}
+
 .backBtn.goingHome::after {
     content: "";
     position: absolute;
@@ -75,6 +79,8 @@
     animation-name: goHomeAnim;
     animation-duration: 0.5s;
     animation-fill-mode: forwards;
+
+    user-select: none;
 }
 
 .backBtn:hover {
@@ -128,6 +134,8 @@
     display: flex;
     justify-content: center;
     align-items: center;
+
+    transition: background 0.5s cubic-bezier(0, 0, 1, -1);;
 }
 
 .play-letter:hover {
@@ -149,6 +157,24 @@
 .play-letter.wrong-place {
     background: yellow;
 }
+
+@keyframes flip {
+    0% {
+        transform: rotateX(0deg);
+    }
+
+    100% {
+        transform: rotateX(360deg);
+    }
+}
+
+.play-letter.checking {
+    animation-name: flip;
+    animation-duration: 0.5s;
+    animation-delay: calc(var(--i) * 0.1s);
+}
+
+
 
 .keyboard {
     display: grid;
@@ -190,6 +216,18 @@
 
 .keyboard-letter:hover {
     transform: scale(1.1);
+}
+
+.keyboard-letter.correct {
+    background: green;
+}
+
+.keyboard-letter.wrong {
+    background: white;
+}
+
+.keyboard-letter.place {
+    background: yellow;
 }
 
 .checkBtn {
@@ -320,6 +358,37 @@
 .game-over-menu button:hover {
     background: rgb(2, 230, 2);
 }
+
+@keyframes slideDown {
+    0% {
+        top: -50px;
+    }
+
+    50% {
+        top: 20vh;
+    }
+}
+
+.message {
+    position: fixed;
+    top: 20vh;
+    left: auto;
+    right: auto;
+
+    width: 200px;
+    padding: 10px;
+    font-size: 20px;
+
+    background: white;
+    border-radius: 10px;
+
+    animation: slideDown 1s;
+
+    user-select: none;
+
+    z-index: 9999;
+}
+
 
 @media (max-width: 400px) {
     .play-word-container {
