@@ -20,7 +20,7 @@ const PlayPage = ({number}) => {
     const [wrongLetters, setWrongLetters] = useState([]);
     const [placeLetters, setPlaceLetters] = useState([]);
 
-    const [result, setResult] = useState(new Array(number).fill([]));
+    const [result, setResult] = useState(new Array(number + 1).fill([]));
     const [wordBoard, setWordBoard] = useState(new Array(number + 1).fill("").map( i => (new Array(number).fill(""))));
 
     const [correct, setCorrect] = useState(false);
@@ -69,7 +69,7 @@ const PlayPage = ({number}) => {
         if (correctWord === word.join("")) {
             setCorrect(true);
             setGameOver(true);
-        } else if (currentWord + 1 === number) {
+        } else if (currentWord === number) {
             setGameOver(true);
         }
         const correctArray = correctWord.split("");
@@ -83,9 +83,9 @@ const PlayPage = ({number}) => {
         };
 
         let temp = new Array(number);
-        let _correctLetters = [];
-        let _wrongLetters = [];
-        let _placeLetters = [];
+        let _correctLetters = correctLetters;
+        let _wrongLetters = wrongLetters;
+        let _placeLetters = placeLetters;
         for (let i=0; i < correctArray.length; i++) {
             if (correctArray[i] === word[i]) {
                 temp[i] = 'correct checking';
@@ -109,9 +109,9 @@ const PlayPage = ({number}) => {
         let tempResult = result;
         tempResult[currentWord] = temp;
 
-        setCorrectLetters(_correctLetters);
-        setWrongLetters(_wrongLetters);
-        setPlaceLetters(_placeLetters);
+        setCorrectLetters([..._correctLetters]);
+        setWrongLetters([..._wrongLetters]);
+        setPlaceLetters([..._placeLetters]);
 
         setResult([...tempResult]);
         setCurrentIndex(0);
@@ -145,12 +145,16 @@ const PlayPage = ({number}) => {
 
 
     const reset = () => {
-        setResult(new Array(number).fill([]));
-        setWordBoard(new Array(number).fill("").map( i => (new Array(number).fill(""))));
+        setResult(new Array(number + 1).fill([]));
+        setWordBoard(new Array(number + 1).fill("").map( i => (new Array(number).fill(""))));
 
         setCurrentIndex(0);
         setCurrentWord(0);
         setCorrectWord(null);
+
+        setCorrectLetters([]);
+        setWrongLetters([]);
+        setPlaceLetters([]);
 
         setCorrect(false);
         setGameOver(false);
@@ -281,6 +285,8 @@ const KeyBoardLetter = ({ index, rowOffset, setCurrentLetter, correctLetters, wr
             setLetterClass("wrong");
         } else if ( placeLetters.includes(letter)) {
             setLetterClass("place")
+        } else {
+            setLetterClass("");
         }
     }, [correctLetters, wrongLetters, placeLetters]);
 
